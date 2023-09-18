@@ -5,61 +5,81 @@
 #include <string.h>
 
 /////////////////////////////
-// Επικαιροποιημένη έκδοση //
+// Updated Version        //
 /////////////////////////////
 
 FILE *fptr;
 int count = 0;
 
+// This function inserts a One-Time Password (OTP).
 int insert_OTP();
-void create_OTP();
-void delete_OTP(); // Αυτή η συνάρτηση δεν θα χρησιμοποιείται ποτέ αυτούσια. Προορίζεται αποκλειστικά για χρήση μέσα στην insert_OTP();
 
+// This function generates a random OTP and saves it to "otp.txt" file.
+void create_OTP();
+
+// This function deletes the OTP file.
+void delete_OTP(); // This function will never be used directly. It is intended exclusively for use within insert_OTP().
+
+// This function creates a new file.
 void create();
+
+// This function writes content to an existing file or creates a new one if it doesn't exist.
 void write();
+
+// This function reads content from an existing file.
 void read();
+
+// This function clears the content of an existing file.
 void clear();
+
+// This function deletes an existing file.
 void fdelete();
+
+// This function checks if a file with the specified name exists.
 int check_existence(char filename[]);
 
+// This function counts the number of registered users.
 void counter();
 
-void write_users(); // Η write() αλλά λίγο παραλλαγμένη.
-                    // Το καλό είναι ότι η read() είναι μια χαρά, οπότε δεν χρειάζομαι μια read_users().
+// This is a variation of the write() function with slight differences.
+void write_users(); // It is good that read() works fine, so I don't need a read_users().
 
-// Όλα λειτουργούν ρολόι σε αυτήν τη συνάρτηση.
-void counter(){ // Αυτή η συνάρτηση μετράει τους εγγεγραμένους χρήστες.
-    fptr = fopen("counter.txt", "r"); // Το ανοίγει για να το διαβάσει.
-    fscanf(fptr, "%d", &count); // Διαβάζει τη μεταβλητή counter, ακόμα κι αν αυτή είναι μηδέν.
-    fclose(fptr); // Κλείνει τον φάκελο.
-    count++; // Το ανεβάζει κατά ένα.
-    fptr = fopen("counter.txt", "w"); // Τώρα το ανοίγει για να το γράψει.
-    fprintf(fptr, "%d", count); // Το γράφει.
-    fclose(fptr); // Το κλείνει.
+// All operations work flawlessly in this function.
+void counter(){ // This function counts the registered users.
+    fptr = fopen("counter.txt", "r"); // It opens it to read.
+    fscanf(fptr, "%d", &count); // It reads the variable 'count', even if it's zero.
+    fclose(fptr); // It closes the folder.
+    count++; // It increments it by one.
+    fptr = fopen("counter.txt", "w"); // Now it opens it to write.
+    fprintf(fptr, "%d", count); // It writes it.
+    fclose(fptr); // It closes it.
 }
 
+// This function generates a random OTP.
 void create_OTP(){
     time_t t;
     srand((unsigned) time(&t));
 
-    char otp[7]; // Το βάζω 7 για να μπει και το \0.
+    char otp[7]; // I make it 7 to include the '\0'.
 
     for(int i = 0; i < 6; i++){
-        otp[i] = (rand()%(57-48))+48; // Θέλω ASCII χαρακτήρες για αριθμούς από το 0 έως το 9.
+        otp[i] = (rand()%(57-48))+48; // I want ASCII characters for numbers from 0 to 9.
     }
-    // Δεν θα χρησιμοποιήσω την create() διότι αυτή έχει ειδική υλοποίηση για χρήση από τον χρήστη. Γι' αυτό θα το κάνω manually.
-    fptr = fopen("otp.txt", "w"); // It creates an empty file with name otp.txt.
+
+    // I won't use create() because it has a special implementation for user use. That's why I'll do it manually.
+    fptr = fopen("otp.txt", "w"); // It creates an empty file with the name "otp.txt".
     fprintf(fptr, "%s", otp);
     fclose(fptr);
 }
 
+// This function prompts the user for an OTP and verifies it.
 int insert_OTP(){
 
-    char password[7]; // Το βάζω 7 για να μπει και το \0.
-    char content[7]; // Το βάζω 7 για να μπει και το \0.
+    char password[7]; // I make it 7 to include the '\0'.
+    char content[7]; // I make it 7 to include the '\0'.
 
-    fptr = fopen("otp.txt", "r"); // Δεν χρειάζεται να ελέγξω αν υπάρχει ο φάκελος otp.txt διότι κατά την κλήση αυτής της συνάρτησης προφανώς και θα υπάρχει.
-                                  // Αφού προηγουμένως θα έχει κληθεί η create_OTP, η οποία φτιάχνει τον otp.txt και του γράφει έναν τυχαίο OTP.
+    fptr = fopen("otp.txt", "r"); // I don't need to check if the folder "otp.txt" exists because it's obviously there when this function is called.
+                                  // After the create_OTP is called, which creates the "otp.txt" and writes a random OTP.
 
     int i = 0;
 
@@ -67,35 +87,38 @@ int insert_OTP(){
         if(i == 6){
             break;
         }
-        content[i] = fgetc(fptr); // Διαβάζει χαρακτήρα - χαρακτήρα τον OTP από τον φάκελο "otp.txt".
+        content[i] = fgetc(fptr); // It reads character by character the OTP from the "otp.txt" folder.
         i++;
     }
     fclose(fptr);
 
-    while(1){ // Αυτή η while θα τρέχει διαρκώς δεχόμενη εισόδους από τον χρήστη μέχρι να εισαχθεί ο σωστός OTP.
+    while(1){ // This while loop will run indefinitely, accepting inputs from the user until the correct OTP is entered.
         printf("\nGive password: ");
         scanf("%s", password);
 
-        if(strcmp(password, content) == 0){ // Μόλις γίνει αυτό, θα διαγράφεται ο φάκελος otp.txt και θα τερματίζεται η ολόκληρη η συνάρτηση.
+        if(strcmp(password, content) == 0){ // As soon as this happens, the "otp.txt" folder will be deleted and the entire function will terminate.
             delete_OTP();
             return 1; // Access accepted!
         }
     }
 }
 
+// This function deletes the OTP file.
 void delete_OTP(){
     int ret = remove("otp.txt");
 }
 
+// This function creates a new file.
 void create(){
     char filename[50];
     printf("Enter file's name: ");
     scanf("%s", filename);
-    fptr = fopen(strcat(filename, ".txt"), "w"); // It creates an empty file with name "filename".
+    fptr = fopen(strcat(filename, ".txt"), "w"); // It creates an empty file with the name "filename".
     fclose(fptr); // It closes the file.
 }
 
-void write(){ // Θα γράφει σε ήδη υπάρχοντα φάκελο. Αν δεν υπάρχει θα τον δημιουργεί.
+// This function writes content to an existing file or creates a new one if it doesn't exist.
+void write(){ // It will write to an already existing folder. If it doesn't exist, it will create it.
 
     char filename[50];
 
@@ -105,9 +128,10 @@ void write(){ // Θα γράφει σε ήδη υπάρχοντα φάκελο. 
     // Consume the newline character left in the input buffer. ChatGPT solved this problem!
     getchar();
 
-    if(check_existence(filename) == 1){ // Θα πρέπει να γίνεται ο έλεγχος αν υπάρχει αυτός ο φάκελος.
-        // Αν υπάρχει, τότε θα γράφεις.
-        fptr = fopen(filename, "a"); // Τώρα βάζω σκέτο filename και όχι strcat, διότι το strcat μπήκε πριν, οπότε το .txt μπήκε ήδη.
+    if(check_existence(filename) == 1){ // I need to check if this folder exists.
+        // If it exists, then you can write to it.
+        fptr = fopen(filename, "a"); // Now I use just 'filename' and not strcat, because strcat was used before,
+                                     // with the call to check_existence, so '.txt' was already added.
         char content[100];
 
         printf("Enter the content you want to write to the file: ");
@@ -120,30 +144,31 @@ void write(){ // Θα γράφει σε ήδη υπάρχοντα φάκελο. 
     }
 }
 
+// This function reads content from an existing file.
 void read(){
 
     char filename[50];
 
     printf("\nEnter the file's name you want to read from: ");
     scanf("%s", filename);
-
+  
     char content[1000];
 
-    if(check_existence(filename) == 1){ // Θα πρέπει να γίνεται ο έλεγχος αν υπάρχει αυτός ο φάκελος.
-        // Αν υπάρχει, τότε, αν βάλεις τον σωστό OTP, θα τον διαβάζεις.
+    if(check_existence(filename) == 1){ // I need to check if this folder exists.
+        // If it exists, then, if you enter the correct OTP, you will be able to read it.
 
         create_OTP();
         int test = insert_OTP();
 
-        if(test == 1){ // Αν βάλεις σωστό κωδικό OTP, τότε θα διαβάζεται.
-            fptr = fopen(filename, "r"); // Τώρα βάζω σκέτο filename και όχι strcat, διότι το strcat μπήκε μόλις πριν,
-                                         // με την κλήση της check_existence, οπότε το .txt μπήκε ήδη.
-            printf("\n"); // Μπαίνει για καλλωπιστικούς λόγους.
+        if(test == 1){ // If you enter the correct OTP, it will be readable.
+            fptr = fopen(filename, "r"); // Now I use just 'filename' and not strcat, because strcat was used just before,
+                                         // with the call to check_existence, so '.txt' was already added.
+            printf("\n"); // This is for aesthetic reasons.
             while(fgets(content, sizeof(content), fptr)){
                 printf("%s", content);
             }
             fclose(fptr);
-        }else if(test == 0){ // Αν δεν βάλεις σωστό κωδικό OTP, τότε δεν θα διαβάζεται.
+        }else if(test == 0){ // If you don't enter the correct OTP, it won't be readable.
             printf("Wrong OTP.\n");
             fclose(fptr);
         }
@@ -152,6 +177,7 @@ void read(){
     }
 }
 
+// This function clears the content of an existing file.
 void clear(){
 
     char filename[50];
@@ -159,25 +185,26 @@ void clear(){
     printf("\nEnter the file's name you want to clear: ");
     scanf("%s", filename);
 
-    if(check_existence(filename) == 1){ // Θα πρέπει να γίνεται ο έλεγχος αν υπάρχει αυτός ο φάκελος.
-        // Αν υπάρχει, τότε θα λαμβάνεις κωδικό OTP.
+    if(check_existence(filename) == 1){ // I need to check if this folder exists.
+        // If it exists, you will receive an OTP.
+
         create_OTP();
         int test = insert_OTP();
 
-        if(test == 1){ // Αν βάλεις σωστό κωδικό OTP, τότε θα καθαρίζεται.
-            fptr = fopen(filename, "w"); // Καθάρισε. Τώρα βάζω σκέτο filename και όχι strcat, διότι το strcat μπήκε μόλις πριν,
-                                         // με την κλήση της check_existence, οπότε το .txt μπήκε ήδη.
+        if(test == 1){ // If you enter the correct OTP, it will be cleared.
+            fptr = fopen(filename, "w"); // Clear it. Now I use just 'filename' and not strcat, because strcat was used just before,
+                                         // with the call to check_existence, so '.txt' was already added.
             printf("\nFile cleared.\n");
             fclose(fptr);
 
-            // Κατά την κλήση της strcmp() μέσα στην if το filename είναι ΗΔΗ με κατάληξη .txt, οπότε
-            if(strcmp(filename, "users.txt") == 0){ // Αν ο φάκελος τον οποίο θες να καθαρίσεις είναι ο "users.txt",
-                                                    // τότε θα καθαρίζεται και ο φάκελος καταμέτρησης "counter.txt".
-                fptr = fopen("counter.txt", "w"); // Βάζω την κατάληξη .txt διότι δεν μπήκε από πουθενά πιο πριν, όπως στον φάκελο users.
+            // When strcmp() is called inside the if, 'filename' already has the .txt extension, so
+            if(strcmp(filename, "users.txt") == 0){ // If the folder you want to clear is "users.txt",
+                                                    // then the counter folder "counter.txt" will also be cleared.
+                fptr = fopen("counter.txt", "w"); // I add the .txt extension because it wasn't added earlier, like in the users folder.
                 fclose(fptr);
             }
 
-        }else if(test == 0){ // Αν δεν βάλεις σωστό κωδικό OTP, τότε δεν θα καθαρίζεται.
+        }else if(test == 0){ // If you don't enter the correct OTP, it won't be cleared.
             printf("Wrong OTP.\n");
             fclose(fptr);
         }
@@ -186,6 +213,7 @@ void clear(){
     }
 }
 
+// This function deletes an existing file.
 void fdelete(){
 
     char filename[50];
@@ -193,23 +221,24 @@ void fdelete(){
     printf("Enter the file's name you want to delete: ");
     scanf("%s", filename);
 
-    if(check_existence(filename) == 1){ // Θα πρέπει να γίνεται ο έλεγχος αν υπάρχει αυτός ο φάκελος.
-        // Αν υπάρχει, τότε θα λαμβάνεις κωδικό OTP.
+    if(check_existence(filename) == 1){ // I need to check if this folder exists.
+        // If it exists, you will receive an OTP.
+
         create_OTP();
         int test = insert_OTP();
 
-        if(test == 1){ // Αν βάλεις σωστό κωδικό OTP, τότε θα καθαρίζεται.
+        if(test == 1){ // If you enter the correct OTP, it will be deleted.
            int ret = remove(filename);
             if(ret == 0) {
                 printf("File deleted successfully.\n");
             }
-            if(strcmp(filename, "users.txt") == 0){ // Αν ο φάκελος τον οποίο θέλεις να διαγράψεις είναι ο "users.txt",
-                                         // τότε θα διαγράφεται και ο "counter.txt", ώστε όταν θελήσεις να τον ξαναφτιάξεις να μην υπάρχει ήδη.
+            if(strcmp(filename, "users.txt") == 0){ // If the folder you want to delete is "users.txt",
+                                         // then "counter.txt" will also be deleted, so when you want to recreate it, it won't already exist.
                 int ret = remove("counter.txt");
             }
 
 
-        }else if(test == 0){ // Αν δεν βάλεις σωστό κωδικό OTP, τότε δεν θα καθαρίζεται.
+        }else if(test == 0){ // If you don't enter the correct OTP, it won't be cleared.
             printf("Wrong OTP.\n");
             fclose(fptr);
             delete_OTP();
@@ -219,7 +248,8 @@ void fdelete(){
     }
 }
 
-int check_existence(char filename[]){ // Επιστρέφει true αν υπάρχει, αλλιώς δεν υπάρχει.
+// This function checks if a file with the specified name exists.
+int check_existence(char filename[]){ // It returns true if it exists, otherwise it doesn't exist.
 
     fptr = fopen(strcat(filename, ".txt"), "r");
 
@@ -232,11 +262,12 @@ int check_existence(char filename[]){ // Επιστρέφει true αν υπάρ
     }
 }
 
-void write_users(){ // Θα γράφει σε ήδη υπάρχοντα φάκελο. Αν δεν υπάρχει θα τον δημιουργεί.
+// This function writes user information to an existing file or creates a new one if it doesn't exist.
+void write_users(){ // It will write to an already existing folder. If it doesn't exist, it will create it.
 
-    counter(); // Θα καλεί αυτήν μόνο και μόνο για να είναι σωστή η αρίθμηση των χρηστών μέσα στον φάκελο "users.txt".
+    counter(); // It will call this only to ensure that the user numbering inside the "users.txt" folder is correct.
 
-    fptr = fopen("users.txt", "a"); // Τώρα βάζω σκέτο filename και όχι strcat, διότι το strcat μπήκε πριν, οπότε το .txt μπήκε ήδη.
+    fptr = fopen("users.txt", "a"); // Now I use just 'filename' and not strcat, because strcat was used before, so '.txt' was already added.
 
     char username[50];
     char password[50];
@@ -251,5 +282,3 @@ void write_users(){ // Θα γράφει σε ήδη υπάρχοντα φάκε
 
     fclose(fptr);
 }
-
-
